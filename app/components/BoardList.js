@@ -7,6 +7,7 @@ function PostRow({ post }) {
       <div className="board-row__title">
         <p className="board-title">{post.title}</p>
         <div className="board-row__meta">
+          <span className="category-chip">{post.categoryLabel}</span>
           <span>{post.date}</span>
           <span>{post.view} views</span>
         </div>

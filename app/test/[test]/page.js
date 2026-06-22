@@ -6,9 +6,9 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
 
-export default async function TestGroupPage({ params }) {
+export default async function TestGroupPage({ params, searchParams }) {
   const group = toPositiveNumber(params.test);
   const firstPageInGroup = (group - 1) * PAGE_GROUP_SIZE + 1;
-  const state = await fetchBoardPage(firstPageInGroup);
+  const state = await fetchBoardPage(firstPageInGroup, searchParams?.category);
   return <BoardPage {...state} />;
 }

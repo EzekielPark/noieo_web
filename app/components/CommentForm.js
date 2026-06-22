@@ -1,8 +1,19 @@
-export default function CommentForm({ parentId, notice }) {
+export default function CommentForm({
+  parentId,
+  notice,
+  replyTo = "",
+  compact = false,
+  submitLabel = "Post",
+  placeholder = "write a reply",
+}) {
   return (
     <>
       {notice ? <p className="notice-inline">{notice}</p> : null}
-      <form className="comment-form-compact" action="/api/comment/new" method="POST">
+      <form
+        className={`comment-form-compact${compact ? " comment-form-compact--reply" : ""}`}
+        action="/api/comment/new"
+        method="POST"
+      >
         <input className="compact-field" name="author" maxLength="16" placeholder="name" required />
         <input
           className="compact-field"
@@ -15,10 +26,11 @@ export default function CommentForm({ parentId, notice }) {
           placeholder="password"
           required
         />
-        <input className="compact-field" name="comment" maxLength="500" placeholder="write a reply" required />
+        <input className="compact-field" name="comment" maxLength="500" placeholder={placeholder} required />
         <input type="hidden" name="parent" value={parentId} />
+        {replyTo ? <input type="hidden" name="replyTo" value={replyTo} /> : null}
         <button className="button-primary" type="submit">
-          Post
+          {submitLabel}
         </button>
       </form>
     </>

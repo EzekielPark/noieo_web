@@ -1,5 +1,6 @@
 import { connectDB } from "app/test/mongo/database";
 import { formatDate, getDbName, normalizeText } from "app/lib/board";
+import { normalizeCategory, normalizeSubcategory } from "app/lib/categories";
 import { allowRequestByIp } from "app/lib/rateLimit";
 import { isApprovedWriter, isValidGmailEmail, normalizeEmail } from "app/lib/writerApproval";
 
@@ -14,18 +15,21 @@ export default async function handler(req, res) {
   const content = normalizeText(req.body.content);
   const password = normalizeText(req.body.password);
   const authorEmail = normalizeEmail(req.body.authorEmail);
+  const category = normalizeCategory(req.body.category);
+  const subcategory = normalizeSubcategory(category, req.body.subcategory);
+  const needsApprovedEmail = category !== "free";
 
   if (!title || !content || !/^\d{4}$/.test(password)) {
     return res.redirect(302, "/write/");
   }
 
-  if (!isValidGmailEmail(authorEmail)) {
+  if (needsApprovedEmail && !isValidGmailEmail(authorEmail)) {
     return res.redirect(302, `/write/?error=invalid_email&email=${encodeURIComponent(authorEmail)}`);
   }
 
   const client = await connectDB;
-  const approved = await isApprovedWriter(client, authorEmail);
-  if (!approved) {
+  const approved = needsApprovedEmail ? await isApprovedWriter(client, authorEmail) : true;
+  if (needsApprovedEmail && !approved) {
     return res.redirect(
       302,
       `/write/?error=writer_not_approved&email=${encodeURIComponent(authorEmail)}`
@@ -51,6 +55,8 @@ export default async function handler(req, res) {
     title,
     content,
     authorEmail,
+    category,
+    subcategory,
     password,
     date: formatDate(),
     view: 0,

@@ -22,8 +22,12 @@ export default async function handler(req, res) {
     return res.redirect(302, `/test/with/${parent}`);
   }
 
-  await db.collection("comment").deleteOne({ _id: new ObjectId(_id) });
+  await db.collection("comment").deleteMany({
+    $or: [
+      { _id: new ObjectId(_id) },
+      { replyTo: _id },
+    ],
+  });
 
   return res.redirect(302, `/test/with/${parent}`);
 }
-

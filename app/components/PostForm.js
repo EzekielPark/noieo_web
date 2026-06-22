@@ -1,3 +1,15 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import {
+  DEFAULT_POST_CATEGORY,
+  DEFAULT_POST_SUBCATEGORY,
+  POST_CATEGORIES,
+  getCategory,
+  normalizeCategory,
+  normalizeSubcategory,
+} from "../lib/categories";
+
 export default function PostForm({
   action,
   submitLabel,
@@ -8,6 +20,16 @@ export default function PostForm({
   hiddenFields = [],
 }) {
   const { title = "", content = "", authorEmail = "" } = defaultValues;
+  const initialCategory = normalizeCategory(defaultValues.category);
+  const initialSubcategory = normalizeSubcategory(
+    initialCategory,
+    defaultValues.subcategory || DEFAULT_POST_SUBCATEGORY,
+  );
+  const [category, setCategory] = useState(initialCategory);
+  const [subcategory, setSubcategory] = useState(initialSubcategory || DEFAULT_POST_SUBCATEGORY);
+  const activeCategory = useMemo(() => getCategory(category), [category]);
+  const subcategories = activeCategory?.subcategories || [];
+  const needsApprovedEmail = category !== "free";
 
   return (
     <form className="form-panel glass-panel" action={action} method="POST">
@@ -20,13 +42,54 @@ export default function PostForm({
       {notice ? <p className="notice-inline">{notice}</p> : null}
       <div className="form-grid">
         <label className="field--full">
-          <span>Approved gmail.com email</span>
-          <input name="authorEmail" maxLength="80" defaultValue={authorEmail} required />
+          <span>{needsApprovedEmail ? "승인된 gmail.com 이메일" : "gmail.com 이메일 (선택)"}</span>
+          <input
+            name="authorEmail"
+            maxLength="80"
+            defaultValue={authorEmail}
+            required={needsApprovedEmail}
+          />
         </label>
         <label className="field--full">
           <span>Title</span>
           <input name="title" maxLength="60" defaultValue={title} required />
         </label>
+        <label>
+          <span>대분류</span>
+          <select
+            name="category"
+            value={category}
+            onChange={(event) => {
+              const nextCategory = event.target.value;
+              setCategory(nextCategory);
+              setSubcategory(DEFAULT_POST_SUBCATEGORY);
+            }}
+          >
+            {POST_CATEGORIES.map((categoryOption) => (
+              <option key={categoryOption.value} value={categoryOption.value}>
+                {categoryOption.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        {subcategories.length ? (
+          <label>
+            <span>세부 분류</span>
+            <select
+              name="subcategory"
+              value={subcategory}
+              onChange={(event) => setSubcategory(event.target.value)}
+            >
+              {subcategories.map((subcategory) => (
+                <option key={subcategory.value} value={subcategory.value}>
+                  {subcategory.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <input type="hidden" name="subcategory" value="" />
+        )}
         {includePassword ? (
           <label>
             <span>Password</span>

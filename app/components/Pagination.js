@@ -1,15 +1,21 @@
 import Link from "next/link";
 
-function pageHref(page) {
+function pageHref(page, categoryFilter) {
   const group = Math.ceil(page / 5);
-  return `/test/${group}/${page}`;
+  const href = `/test/${group}/${page}`;
+  return categoryFilter && categoryFilter !== "all" ? `${href}?category=${categoryFilter}` : href;
 }
 
-export default function Pagination({ pagination }) {
+function groupHref(group, categoryFilter) {
+  const href = `/test/${group}`;
+  return categoryFilter && categoryFilter !== "all" ? `${href}?category=${categoryFilter}` : href;
+}
+
+export default function Pagination({ pagination, categoryFilter }) {
   return (
     <div className="pagination">
       {pagination.hasPrevGroup ? (
-        <Link className="pagination-link" href={`/test/${pagination.currentGroup - 1}`}>
+        <Link className="pagination-link" href={groupHref(pagination.currentGroup - 1, categoryFilter)}>
           Prev
         </Link>
       ) : null}
@@ -17,17 +23,16 @@ export default function Pagination({ pagination }) {
         <Link
           key={page}
           className={`pagination-link${page === pagination.currentPage ? " is-active" : ""}`}
-          href={pageHref(page)}
+          href={pageHref(page, categoryFilter)}
         >
           {page}
         </Link>
       ))}
       {pagination.hasNextGroup ? (
-        <Link className="pagination-link" href={`/test/${pagination.currentGroup + 1}`}>
+        <Link className="pagination-link" href={groupHref(pagination.currentGroup + 1, categoryFilter)}>
           Next
         </Link>
       ) : null}
     </div>
   );
 }
-

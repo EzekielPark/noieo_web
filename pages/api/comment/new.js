@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { connectDB } from "app/test/mongo/database";
 import { getDbName, normalizeText } from "app/lib/board";
 import { allowRequestByIp } from "app/lib/rateLimit";
@@ -13,6 +14,7 @@ export default async function handler(req, res) {
   const author = normalizeText(req.body.author, "guest");
   const comment = normalizeText(req.body.comment);
   const password = normalizeText(req.body.password);
+  const replyTo = normalizeText(req.body.replyTo);
 
   if (!parent || !comment || !/^\d{4}$/.test(password)) {
     return res.redirect(302, `/test/with/${parent}`);
@@ -32,12 +34,19 @@ export default async function handler(req, res) {
   }
 
   const db = client.db(getDbName());
+  let normalizedReplyTo = "";
+
+  if (replyTo && ObjectId.isValid(replyTo)) {
+    const rootComment = await db.collection("comment").findOne({ _id: new ObjectId(replyTo), parent });
+    normalizedReplyTo = rootComment?.replyTo ? "" : replyTo;
+  }
 
   await db.collection("comment").insertOne({
     parent,
     author,
     comment,
     password,
+    replyTo: normalizedReplyTo,
   });
 
   return res.redirect(302, `/test/with/${parent}`);

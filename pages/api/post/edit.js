@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { connectDB } from "app/test/mongo/database";
 import { getDbName, normalizeText } from "app/lib/board";
+import { normalizeCategory, normalizeSubcategory } from "app/lib/categories";
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
@@ -14,6 +15,8 @@ export default async function handler(req, res) {
   const password = normalizeText(req.body.password);
   const title = normalizeText(req.body.title);
   const content = normalizeText(req.body.content);
+  const category = normalizeCategory(req.body.category);
+  const subcategory = normalizeSubcategory(category, req.body.subcategory);
 
   if (!_id || !title || !content || !/^\d{4}$/.test(password)) {
     return res.redirect(302, `/edit/${_id}`);
@@ -31,6 +34,8 @@ export default async function handler(req, res) {
       $set: {
         title,
         content,
+        category,
+        subcategory,
       },
     }
   );

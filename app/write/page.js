@@ -31,7 +31,7 @@ export default async function WritePage({ searchParams }) {
         action="/api/post/new"
         submitLabel="Publish post"
         helperText={
-          "\uC2B9\uC778 \uC2E0\uCCAD \uD6C4 \uC2B9\uC778\uB41C \uC774\uBA54\uC77C\uB85C\uB9CC \uBCF8\uBB38 \uAE00\uC4F0\uAE30\uAC00 \uAC00\uB2A5\uD569\uB2C8\uB2E4."
+          "물리학과 인문학은 승인된 이메일로만 글쓰기가 가능하고, 자유게시판은 누구나 쓸 수 있습니다."
         }
         notice={notice}
         defaultValues={{ authorEmail: searchParams?.email || "" }}

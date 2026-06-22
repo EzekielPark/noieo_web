@@ -7,6 +7,12 @@ import CommentForm from "../../../components/CommentForm";
 import CommentList from "../../../components/CommentList";
 import { connectDB } from "../../mongo/database";
 import { formatDate, getClientIp, getDbName } from "../../../lib/board";
+import {
+  getCategoryLabel,
+  getPostCategory,
+  getPostSubcategory,
+  getSubcategoryLabel,
+} from "../../../lib/categories";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -45,6 +51,9 @@ export default async function PostDetailPage({ params, searchParams }) {
   }
 
   let currentViewCount = Number(post.view || 0);
+  const category = getPostCategory(post);
+  const subcategory = getPostSubcategory(post);
+  const subcategoryLabel = getSubcategoryLabel(category, subcategory);
 
   if (clientIp) {
     const viewLogCollection = db.collection("board_view_logs");
@@ -100,6 +109,8 @@ export default async function PostDetailPage({ params, searchParams }) {
         </div>
         <div className="article-meta">
           <span>No. {post.number}</span>
+          <span>{getCategoryLabel(category)}</span>
+          {subcategoryLabel && subcategory !== "none" ? <span>{subcategoryLabel}</span> : null}
           <span>{post.date}</span>
           <span>{currentViewCount} views</span>
         </div>
