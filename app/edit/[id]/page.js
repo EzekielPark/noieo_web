@@ -40,6 +40,7 @@ export default async function EditPage({ params }) {
           content: post.content,
           category: post.category,
           subcategory: post.subcategory,
+          image: post.image,
         }}
         hiddenFields={[{ name: "_id", value: post._id.toString() }]}
       />

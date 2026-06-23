@@ -114,6 +114,11 @@ export default async function PostDetailPage({ params, searchParams }) {
           <span>{post.date}</span>
           <span>{currentViewCount} views</span>
         </div>
+        {post.image?.dataUrl ? (
+          <div className="article-image-wrap">
+            <img className="article-image" src={post.image.dataUrl} alt={post.image.name || post.title} />
+          </div>
+        ) : null}
         <div className="article-body">{post.content}</div>
       </div>
       <CommentForm parentId={post._id.toString()} notice={notice} />

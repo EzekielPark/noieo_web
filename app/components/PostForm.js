@@ -9,6 +9,7 @@ import {
   normalizeCategory,
   normalizeSubcategory,
 } from "../lib/categories";
+import { getPostImageError } from "../lib/postImage";
 
 export default function PostForm({
   action,
@@ -27,9 +28,45 @@ export default function PostForm({
   );
   const [category, setCategory] = useState(initialCategory);
   const [subcategory, setSubcategory] = useState(initialSubcategory || DEFAULT_POST_SUBCATEGORY);
+  const [imageDataUrl, setImageDataUrl] = useState("");
+  const [imageName, setImageName] = useState("");
+  const [imageError, setImageError] = useState("");
+  const [isReadingImage, setIsReadingImage] = useState(false);
   const activeCategory = useMemo(() => getCategory(category), [category]);
   const subcategories = activeCategory?.subcategories || [];
   const needsApprovedEmail = category !== "free";
+  const currentImageName = defaultValues.image?.name || "";
+
+  function handleImageChange(event) {
+    const file = event.target.files?.[0];
+    setImageDataUrl("");
+    setImageName("");
+    setImageError("");
+
+    if (!file) {
+      return;
+    }
+
+    const error = getPostImageError(file);
+    if (error) {
+      event.target.value = "";
+      setImageError(error);
+      return;
+    }
+
+    setIsReadingImage(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageDataUrl(String(reader.result || ""));
+      setImageName(file.name);
+      setIsReadingImage(false);
+    };
+    reader.onerror = () => {
+      setImageError("이미지를 읽지 못했습니다. 다시 선택해주세요.");
+      setIsReadingImage(false);
+    };
+    reader.readAsDataURL(file);
+  }
 
   return (
     <form className="form-panel glass-panel" action={action} method="POST">
@@ -106,6 +143,21 @@ export default function PostForm({
           </label>
         ) : null}
         <label className="field--full">
+          <span>이미지</span>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/gif,image/webp,image/avif"
+            onChange={handleImageChange}
+          />
+          <input type="hidden" name="imageDataUrl" value={imageDataUrl} />
+          <input type="hidden" name="imageName" value={imageName} />
+          {currentImageName && !imageName ? (
+            <p className="field-hint">현재 이미지: {currentImageName}</p>
+          ) : null}
+          {imageName ? <p className="field-hint">첨부 이미지: {imageName}</p> : null}
+          {imageError ? <p className="notice-inline">{imageError}</p> : null}
+        </label>
+        <label className="field--full">
           <span>Content</span>
           <textarea name="content" maxLength="2000" defaultValue={content} required />
         </label>
@@ -114,8 +166,8 @@ export default function PostForm({
         <input key={field.name} type="hidden" name={field.name} value={field.value} />
       ))}
       <div className="form-actions">
-        <button className="button-primary" type="submit">
-          {submitLabel}
+        <button className="button-primary" type="submit" disabled={isReadingImage}>
+          {isReadingImage ? "Reading image..." : submitLabel}
         </button>
       </div>
     </form>

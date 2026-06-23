@@ -2,6 +2,15 @@ import { ObjectId } from "mongodb";
 import { connectDB } from "app/test/mongo/database";
 import { getDbName, normalizeText } from "app/lib/board";
 import { normalizeCategory, normalizeSubcategory } from "app/lib/categories";
+import { normalizePostImage } from "app/lib/postImage";
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: "30mb",
+    },
+  },
+};
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
@@ -17,8 +26,17 @@ export default async function handler(req, res) {
   const content = normalizeText(req.body.content);
   const category = normalizeCategory(req.body.category);
   const subcategory = normalizeSubcategory(category, req.body.subcategory);
+  const imageDataUrl = normalizeText(req.body.imageDataUrl);
+  const image = normalizePostImage({
+    dataUrl: imageDataUrl,
+    name: normalizeText(req.body.imageName),
+  });
 
   if (!_id || !title || !content || !/^\d{4}$/.test(password)) {
+    return res.redirect(302, `/edit/${_id}`);
+  }
+
+  if (imageDataUrl && !image) {
     return res.redirect(302, `/edit/${_id}`);
   }
 
@@ -28,17 +46,18 @@ export default async function handler(req, res) {
     return res.redirect(302, `/edit/${_id}`);
   }
 
-  await db.collection("board").updateOne(
-    { _id: new ObjectId(_id) },
-    {
-      $set: {
-        title,
-        content,
-        category,
-        subcategory,
-      },
-    }
-  );
+  const $set = {
+    title,
+    content,
+    category,
+    subcategory,
+  };
+
+  if (image) {
+    $set.image = image;
+  }
+
+  await db.collection("board").updateOne({ _id: new ObjectId(_id) }, { $set });
 
   return res.redirect(302, `/test/with/${_id}`);
 }

@@ -1,8 +1,17 @@
 import { connectDB } from "app/test/mongo/database";
 import { formatDate, getDbName, normalizeText } from "app/lib/board";
 import { normalizeCategory, normalizeSubcategory } from "app/lib/categories";
+import { normalizePostImage } from "app/lib/postImage";
 import { allowRequestByIp } from "app/lib/rateLimit";
 import { isApprovedWriter, isValidGmailEmail, normalizeEmail } from "app/lib/writerApproval";
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: "30mb",
+    },
+  },
+};
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
@@ -18,9 +27,18 @@ export default async function handler(req, res) {
   const category = normalizeCategory(req.body.category);
   const subcategory = normalizeSubcategory(category, req.body.subcategory);
   const needsApprovedEmail = category !== "free";
+  const imageDataUrl = normalizeText(req.body.imageDataUrl);
+  const image = normalizePostImage({
+    dataUrl: imageDataUrl,
+    name: normalizeText(req.body.imageName),
+  });
 
   if (!title || !content || !/^\d{4}$/.test(password)) {
     return res.redirect(302, "/write/");
+  }
+
+  if (imageDataUrl && !image) {
+    return res.redirect(302, "/write/?error=image_invalid");
   }
 
   if (needsApprovedEmail && !isValidGmailEmail(authorEmail)) {
@@ -57,6 +75,7 @@ export default async function handler(req, res) {
     authorEmail,
     category,
     subcategory,
+    image,
     password,
     date: formatDate(),
     view: 0,

@@ -11,6 +11,8 @@ export default async function WritePage({ searchParams }) {
       "\uC2B9\uC778\uB41C gmail.com \uC774\uBA54\uC77C\uB9CC \uAE00\uC744 \uC4F8 \uC218 \uC788\uC2B5\uB2C8\uB2E4.",
     invalid_email:
       "\uC62C\uBC14\uB978 gmail.com \uC774\uBA54\uC77C\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694.",
+    image_invalid:
+      "이미지는 JPG, PNG, GIF, WEBP, AVIF 형식으로 최대 10MB까지 첨부할 수 있습니다.",
   };
   const notice = noticeMap[searchParams?.error];
 
