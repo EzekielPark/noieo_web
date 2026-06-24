@@ -4,6 +4,7 @@ import { normalizeCategory, normalizeSubcategory } from "app/lib/categories";
 import { normalizePostImage } from "app/lib/postImage";
 import { allowRequestByIp } from "app/lib/rateLimit";
 import { isApprovedWriter, isValidGmailEmail, normalizeEmail } from "app/lib/writerApproval";
+import { normalizeYouTubeVideo } from "app/lib/youtube";
 
 export const config = {
   api: {
@@ -32,6 +33,8 @@ export default async function handler(req, res) {
     dataUrl: imageDataUrl,
     name: normalizeText(req.body.imageName),
   });
+  const youtubeUrl = normalizeText(req.body.youtubeUrl);
+  const youtube = normalizeYouTubeVideo(youtubeUrl);
 
   if (!title || !content || !/^\d{4}$/.test(password)) {
     return res.redirect(302, "/write/");
@@ -39,6 +42,10 @@ export default async function handler(req, res) {
 
   if (imageDataUrl && !image) {
     return res.redirect(302, "/write/?error=image_invalid");
+  }
+
+  if (youtubeUrl && !youtube) {
+    return res.redirect(302, "/write/?error=youtube_invalid");
   }
 
   if (needsApprovedEmail && !isValidGmailEmail(authorEmail)) {
@@ -76,6 +83,7 @@ export default async function handler(req, res) {
     category,
     subcategory,
     image,
+    youtube,
     password,
     date: formatDate(),
     view: 0,

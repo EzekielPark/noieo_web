@@ -13,6 +13,7 @@ import {
   getPostSubcategory,
   getSubcategoryLabel,
 } from "../../../lib/categories";
+import { getYouTubeEmbedUrl } from "../../../lib/youtube";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -54,6 +55,7 @@ export default async function PostDetailPage({ params, searchParams }) {
   const category = getPostCategory(post);
   const subcategory = getPostSubcategory(post);
   const subcategoryLabel = getSubcategoryLabel(category, subcategory);
+  const youtubeEmbedUrl = getYouTubeEmbedUrl(post.youtube?.videoId);
 
   if (clientIp) {
     const viewLogCollection = db.collection("board_view_logs");
@@ -117,6 +119,17 @@ export default async function PostDetailPage({ params, searchParams }) {
         {post.image?.dataUrl ? (
           <div className="article-image-wrap">
             <img className="article-image" src={post.image.dataUrl} alt={post.image.name || post.title} />
+          </div>
+        ) : null}
+        {youtubeEmbedUrl ? (
+          <div className="article-video-wrap">
+            <iframe
+              className="article-video"
+              src={youtubeEmbedUrl}
+              title={`${post.title} YouTube video`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
           </div>
         ) : null}
         <div className="article-body">{post.content}</div>

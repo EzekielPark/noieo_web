@@ -36,6 +36,7 @@ export default function PostForm({
   const subcategories = activeCategory?.subcategories || [];
   const needsApprovedEmail = category !== "free";
   const currentImageName = defaultValues.image?.name || "";
+  const currentYouTubeUrl = defaultValues.youtube?.url || "";
 
   function handleImageChange(event) {
     const file = event.target.files?.[0];
@@ -117,9 +118,9 @@ export default function PostForm({
               value={subcategory}
               onChange={(event) => setSubcategory(event.target.value)}
             >
-              {subcategories.map((subcategory) => (
-                <option key={subcategory.value} value={subcategory.value}>
-                  {subcategory.label}
+              {subcategories.map((subcategoryOption) => (
+                <option key={subcategoryOption.value} value={subcategoryOption.value}>
+                  {subcategoryOption.label}
                 </option>
               ))}
             </select>
@@ -156,6 +157,17 @@ export default function PostForm({
           ) : null}
           {imageName ? <p className="field-hint">첨부 이미지: {imageName}</p> : null}
           {imageError ? <p className="notice-inline">{imageError}</p> : null}
+        </label>
+        <label className="field--full">
+          <span>YouTube URL</span>
+          <input
+            type="url"
+            name="youtubeUrl"
+            maxLength="300"
+            defaultValue={currentYouTubeUrl}
+            placeholder="https://www.youtube.com/watch?v=..."
+          />
+          <p className="field-hint">유튜브 영상 링크 1개를 선택적으로 첨부할 수 있습니다.</p>
         </label>
         <label className="field--full">
           <span>Content</span>

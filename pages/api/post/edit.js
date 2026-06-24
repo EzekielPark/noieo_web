@@ -3,6 +3,7 @@ import { connectDB } from "app/test/mongo/database";
 import { getDbName, normalizeText } from "app/lib/board";
 import { normalizeCategory, normalizeSubcategory } from "app/lib/categories";
 import { normalizePostImage } from "app/lib/postImage";
+import { normalizeYouTubeVideo } from "app/lib/youtube";
 
 export const config = {
   api: {
@@ -31,12 +32,18 @@ export default async function handler(req, res) {
     dataUrl: imageDataUrl,
     name: normalizeText(req.body.imageName),
   });
+  const youtubeUrl = normalizeText(req.body.youtubeUrl);
+  const youtube = normalizeYouTubeVideo(youtubeUrl);
 
   if (!_id || !title || !content || !/^\d{4}$/.test(password)) {
     return res.redirect(302, `/edit/${_id}`);
   }
 
   if (imageDataUrl && !image) {
+    return res.redirect(302, `/edit/${_id}`);
+  }
+
+  if (youtubeUrl && !youtube) {
     return res.redirect(302, `/edit/${_id}`);
   }
 
@@ -51,6 +58,7 @@ export default async function handler(req, res) {
     content,
     category,
     subcategory,
+    youtube,
   };
 
   if (image) {
