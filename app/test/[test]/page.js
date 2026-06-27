@@ -9,6 +9,6 @@ export const fetchCache = "force-no-store";
 export default async function TestGroupPage({ params, searchParams }) {
   const group = toPositiveNumber(params.test);
   const firstPageInGroup = (group - 1) * PAGE_GROUP_SIZE + 1;
-  const state = await fetchBoardPage(firstPageInGroup, searchParams?.category);
+  const state = await fetchBoardPage(firstPageInGroup, searchParams?.category, searchParams?.subcategory);
   return <BoardPage {...state} />;
 }

@@ -8,6 +8,6 @@ export const fetchCache = "force-no-store";
 
 export default async function TestPagedPage({ params, searchParams }) {
   const page = toPositiveNumber(params.id);
-  const state = await fetchBoardPage(page, searchParams?.category);
+  const state = await fetchBoardPage(page, searchParams?.category, searchParams?.subcategory);
   return <BoardPage {...state} />;
 }

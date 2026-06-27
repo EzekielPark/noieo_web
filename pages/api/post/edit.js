@@ -3,12 +3,13 @@ import { connectDB } from "app/test/mongo/database";
 import { getDbName, normalizeText } from "app/lib/board";
 import { normalizeCategory, normalizeSubcategory } from "app/lib/categories";
 import { normalizePostImage } from "app/lib/postImage";
+import { savePostPdf, validatePdfDataUrl } from "app/lib/postPdf";
 import { normalizeYouTubeVideo } from "app/lib/youtube";
 
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: "30mb",
+      sizeLimit: "90mb",
     },
   },
 };
@@ -34,6 +35,8 @@ export default async function handler(req, res) {
   });
   const youtubeUrl = normalizeText(req.body.youtubeUrl);
   const youtube = normalizeYouTubeVideo(youtubeUrl);
+  const pdfDataUrl = normalizeText(req.body.pdfDataUrl);
+  const pdfValidation = validatePdfDataUrl(pdfDataUrl);
 
   if (!_id || !title || !content || !/^\d{4}$/.test(password)) {
     return res.redirect(302, `/edit/${_id}`);
@@ -44,6 +47,10 @@ export default async function handler(req, res) {
   }
 
   if (youtubeUrl && !youtube) {
+    return res.redirect(302, `/edit/${_id}`);
+  }
+
+  if (!pdfValidation.ok) {
     return res.redirect(302, `/edit/${_id}`);
   }
 
@@ -63,6 +70,15 @@ export default async function handler(req, res) {
 
   if (image) {
     $set.image = image;
+  }
+
+  const pdf = await savePostPdf({
+    dataUrl: pdfDataUrl,
+    name: normalizeText(req.body.pdfName),
+  });
+
+  if (pdf) {
+    $set.pdf = pdf;
   }
 
   await db.collection("board").updateOne({ _id: new ObjectId(_id) }, { $set });

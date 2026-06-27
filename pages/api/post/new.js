@@ -2,6 +2,7 @@ import { connectDB } from "app/test/mongo/database";
 import { formatDate, getDbName, normalizeText } from "app/lib/board";
 import { normalizeCategory, normalizeSubcategory } from "app/lib/categories";
 import { normalizePostImage } from "app/lib/postImage";
+import { savePostPdf, validatePdfDataUrl } from "app/lib/postPdf";
 import { allowRequestByIp } from "app/lib/rateLimit";
 import { isApprovedWriter, isValidGmailEmail, normalizeEmail } from "app/lib/writerApproval";
 import { normalizeYouTubeVideo } from "app/lib/youtube";
@@ -9,7 +10,7 @@ import { normalizeYouTubeVideo } from "app/lib/youtube";
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: "30mb",
+      sizeLimit: "90mb",
     },
   },
 };
@@ -35,6 +36,8 @@ export default async function handler(req, res) {
   });
   const youtubeUrl = normalizeText(req.body.youtubeUrl);
   const youtube = normalizeYouTubeVideo(youtubeUrl);
+  const pdfDataUrl = normalizeText(req.body.pdfDataUrl);
+  const pdfValidation = validatePdfDataUrl(pdfDataUrl);
 
   if (!title || !content || !/^\d{4}$/.test(password)) {
     return res.redirect(302, "/write/");
@@ -46,6 +49,10 @@ export default async function handler(req, res) {
 
   if (youtubeUrl && !youtube) {
     return res.redirect(302, "/write/?error=youtube_invalid");
+  }
+
+  if (!pdfValidation.ok) {
+    return res.redirect(302, "/write/?error=pdf_invalid");
   }
 
   if (needsApprovedEmail && !isValidGmailEmail(authorEmail)) {
@@ -75,6 +82,10 @@ export default async function handler(req, res) {
 
   const db = client.db(getDbName());
   const total = await db.collection("board").countDocuments();
+  const pdf = await savePostPdf({
+    dataUrl: pdfDataUrl,
+    name: normalizeText(req.body.pdfName),
+  });
 
   await db.collection("board").insertOne({
     title,
@@ -84,6 +95,7 @@ export default async function handler(req, res) {
     subcategory,
     image,
     youtube,
+    pdf,
     password,
     date: formatDate(),
     view: 0,

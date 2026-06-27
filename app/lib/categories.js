@@ -1,12 +1,23 @@
 export const POST_CATEGORIES = [
   {
-    value: "physics",
-    label: "물리학",
+    value: "science",
+    label: "자연과학",
     subcategories: [
       { value: "none", label: "구분 없음" },
       { value: "ancient-cosmology", label: "고대 우주관" },
       { value: "lab-equipment", label: "실험장비" },
       { value: "quantum-mechanics", label: "양자 역학" },
+    ],
+  },
+  {
+    value: "engineering",
+    label: "공학",
+    subcategories: [
+      { value: "none", label: "구분 없음" },
+      { value: "gui-web-app", label: "GUI/웹/앱" },
+      { value: "firmware-hardware", label: "펌웨어/하드웨어" },
+      { value: "mechanism-vacuum", label: "기구/진공" },
+      { value: "ai", label: "AI" },
     ],
   },
   {
@@ -21,17 +32,30 @@ export const POST_CATEGORIES = [
     ],
   },
   {
+    value: "archive",
+    label: "아카이브",
+    subcategories: [
+      { value: "physics-textbook", label: "물리학 전공서" },
+      { value: "classic-text", label: "고전 문헌" },
+    ],
+  },
+  {
     value: "free",
     label: "자유게시판",
     subcategories: [],
   },
 ];
 
+export const LEGACY_CATEGORY_MAP = {
+  physics: "science",
+};
+
 export const DEFAULT_POST_CATEGORY = "free";
 export const DEFAULT_POST_SUBCATEGORY = "none";
 
 export function getCategory(value) {
-  return POST_CATEGORIES.find((category) => category.value === value);
+  const normalizedValue = LEGACY_CATEGORY_MAP[value] || value;
+  return POST_CATEGORIES.find((category) => category.value === normalizedValue);
 }
 
 export function normalizeCategory(value) {
@@ -76,9 +100,26 @@ export function getCategoryFilter(value) {
   return category ? category.value : "all";
 }
 
-export function buildCategoryQuery(categoryValue) {
-  if (categoryValue === "physics" || categoryValue === "humanities") {
-    return { category: categoryValue };
+export function getSubcategoryFilter(categoryValue, subcategoryValue) {
+  if (getCategoryFilter(categoryValue) === "all") {
+    return "";
+  }
+
+  const normalized = normalizeSubcategory(categoryValue, subcategoryValue);
+  return normalized && normalized !== DEFAULT_POST_SUBCATEGORY ? normalized : "";
+}
+
+export function buildCategoryQuery(categoryValue, subcategoryValue = "") {
+  if (categoryValue === "all") {
+    return {};
+  }
+
+  if (categoryValue === "science") {
+    const query = { category: { $in: ["science", "physics"] } };
+    if (subcategoryValue) {
+      query.subcategory = subcategoryValue;
+    }
+    return query;
   }
 
   if (categoryValue === "free") {
@@ -91,5 +132,9 @@ export function buildCategoryQuery(categoryValue) {
     };
   }
 
-  return {};
+  const query = { category: categoryValue };
+  if (subcategoryValue) {
+    query.subcategory = subcategoryValue;
+  }
+  return query;
 }

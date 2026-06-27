@@ -11,6 +11,8 @@ import {
 } from "../lib/categories";
 import { getPostImageError } from "../lib/postImage";
 
+const MAX_PDF_BYTES = 50 * 1000 * 1000;
+
 export default function PostForm({
   action,
   submitLabel,
@@ -31,11 +33,15 @@ export default function PostForm({
   const [imageDataUrl, setImageDataUrl] = useState("");
   const [imageName, setImageName] = useState("");
   const [imageError, setImageError] = useState("");
-  const [isReadingImage, setIsReadingImage] = useState(false);
+  const [pdfDataUrl, setPdfDataUrl] = useState("");
+  const [pdfName, setPdfName] = useState("");
+  const [pdfError, setPdfError] = useState("");
+  const [isReadingFile, setIsReadingFile] = useState(false);
   const activeCategory = useMemo(() => getCategory(category), [category]);
   const subcategories = activeCategory?.subcategories || [];
   const needsApprovedEmail = category !== "free";
   const currentImageName = defaultValues.image?.name || "";
+  const currentPdfName = defaultValues.pdf?.name || "";
   const currentYouTubeUrl = defaultValues.youtube?.url || "";
 
   function handleImageChange(event) {
@@ -55,16 +61,52 @@ export default function PostForm({
       return;
     }
 
-    setIsReadingImage(true);
+    setIsReadingFile(true);
     const reader = new FileReader();
     reader.onload = () => {
       setImageDataUrl(String(reader.result || ""));
       setImageName(file.name);
-      setIsReadingImage(false);
+      setIsReadingFile(false);
     };
     reader.onerror = () => {
       setImageError("이미지를 읽지 못했습니다. 다시 선택해주세요.");
-      setIsReadingImage(false);
+      setIsReadingFile(false);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handlePdfChange(event) {
+    const file = event.target.files?.[0];
+    setPdfDataUrl("");
+    setPdfName("");
+    setPdfError("");
+
+    if (!file) {
+      return;
+    }
+
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      event.target.value = "";
+      setPdfError("PDF 파일만 첨부할 수 있습니다.");
+      return;
+    }
+
+    if (file.size > MAX_PDF_BYTES) {
+      event.target.value = "";
+      setPdfError("PDF는 최대 50MB까지 첨부할 수 있습니다.");
+      return;
+    }
+
+    setIsReadingFile(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPdfDataUrl(String(reader.result || ""));
+      setPdfName(file.name);
+      setIsReadingFile(false);
+    };
+    reader.onerror = () => {
+      setPdfError("PDF를 읽지 못했습니다. 다시 선택해주세요.");
+      setIsReadingFile(false);
     };
     reader.readAsDataURL(file);
   }
@@ -80,7 +122,7 @@ export default function PostForm({
       {notice ? <p className="notice-inline">{notice}</p> : null}
       <div className="form-grid">
         <label className="field--full">
-          <span>{needsApprovedEmail ? "승인된 gmail.com 이메일" : "gmail.com 이메일 (선택)"}</span>
+          <span>{needsApprovedEmail ? "승인된 gmail.com 이메일" : "gmail.com 이메일(선택)"}</span>
           <input
             name="authorEmail"
             maxLength="80"
@@ -112,7 +154,7 @@ export default function PostForm({
         </label>
         {subcategories.length ? (
           <label>
-            <span>세부 분류</span>
+            <span>소분류</span>
             <select
               name="subcategory"
               value={subcategory}
@@ -152,9 +194,7 @@ export default function PostForm({
           />
           <input type="hidden" name="imageDataUrl" value={imageDataUrl} />
           <input type="hidden" name="imageName" value={imageName} />
-          {currentImageName && !imageName ? (
-            <p className="field-hint">현재 이미지: {currentImageName}</p>
-          ) : null}
+          {currentImageName && !imageName ? <p className="field-hint">현재 이미지: {currentImageName}</p> : null}
           {imageName ? <p className="field-hint">첨부 이미지: {imageName}</p> : null}
           {imageError ? <p className="notice-inline">{imageError}</p> : null}
         </label>
@@ -170,6 +210,15 @@ export default function PostForm({
           <p className="field-hint">유튜브 영상 링크 1개를 선택적으로 첨부할 수 있습니다.</p>
         </label>
         <label className="field--full">
+          <span>PDF</span>
+          <input type="file" accept="application/pdf,.pdf" onChange={handlePdfChange} />
+          <input type="hidden" name="pdfDataUrl" value={pdfDataUrl} />
+          <input type="hidden" name="pdfName" value={pdfName} />
+          {currentPdfName && !pdfName ? <p className="field-hint">현재 PDF: {currentPdfName}</p> : null}
+          {pdfName ? <p className="field-hint">첨부 PDF: {pdfName}</p> : null}
+          {pdfError ? <p className="notice-inline">{pdfError}</p> : null}
+        </label>
+        <label className="field--full">
           <span>Content</span>
           <textarea name="content" maxLength="2000" defaultValue={content} required />
         </label>
@@ -178,8 +227,8 @@ export default function PostForm({
         <input key={field.name} type="hidden" name={field.name} value={field.value} />
       ))}
       <div className="form-actions">
-        <button className="button-primary" type="submit" disabled={isReadingImage}>
-          {isReadingImage ? "Reading image..." : submitLabel}
+        <button className="button-primary" type="submit" disabled={isReadingFile}>
+          {isReadingFile ? "Reading file..." : submitLabel}
         </button>
       </div>
     </form>

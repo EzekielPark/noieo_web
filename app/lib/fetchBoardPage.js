@@ -7,15 +7,17 @@ import {
   getCategoryLabel,
   getPostCategory,
   getPostSubcategory,
+  getSubcategoryFilter,
   getSubcategoryLabel,
 } from "./categories";
 
-export default async function fetchBoardPage(page, category) {
+export default async function fetchBoardPage(page, category, subcategory) {
   noStore();
 
   const currentPage = toPositiveNumber(page);
   const categoryFilter = getCategoryFilter(category);
-  const filter = buildCategoryQuery(categoryFilter);
+  const subcategoryFilter = getSubcategoryFilter(categoryFilter, subcategory);
+  const filter = buildCategoryQuery(categoryFilter, subcategoryFilter);
   const client = await connectDB;
   const db = client.db(getDbName());
   const totalPosts = await db.collection("board").countDocuments(filter);
@@ -36,6 +38,7 @@ export default async function fetchBoardPage(page, category) {
     totalComments,
     pagination,
     categoryFilter,
+    subcategoryFilter,
     posts: posts.map((post) => ({
       ...post,
       date: post.date || "",

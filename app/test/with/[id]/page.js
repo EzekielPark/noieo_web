@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 import AppShell from "../../../components/AppShell";
 import CommentForm from "../../../components/CommentForm";
 import CommentList from "../../../components/CommentList";
+import PdfBookViewer from "../../../components/PdfBookViewer";
 import { connectDB } from "../../mongo/database";
 import { formatDate, getClientIp, getDbName } from "../../../lib/board";
 import {
@@ -132,6 +133,7 @@ export default async function PostDetailPage({ params, searchParams }) {
             />
           </div>
         ) : null}
+        {post.pdf?.url ? <PdfBookViewer pdf={post.pdf} /> : null}
         <div className="article-body">{post.content}</div>
       </div>
       <CommentForm parentId={post._id.toString()} notice={notice} />

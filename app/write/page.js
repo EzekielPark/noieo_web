@@ -6,15 +6,12 @@ export const dynamic = "force-dynamic";
 
 export default async function WritePage({ searchParams }) {
   const noticeMap = {
-    rate_limit: "\uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574\uC8FC\uC138\uC694",
-    writer_not_approved:
-      "\uC2B9\uC778\uB41C gmail.com \uC774\uBA54\uC77C\uB9CC \uAE00\uC744 \uC4F8 \uC218 \uC788\uC2B5\uB2C8\uB2E4.",
-    invalid_email:
-      "\uC62C\uBC14\uB978 gmail.com \uC774\uBA54\uC77C\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694.",
-    image_invalid:
-      "이미지는 JPG, PNG, GIF, WEBP, AVIF 형식으로 최대 10MB까지 첨부할 수 있습니다.",
-    youtube_invalid:
-      "올바른 YouTube 영상 링크를 입력해주세요.",
+    rate_limit: "잠시 후 다시 시도해주세요",
+    writer_not_approved: "승인된 gmail.com 이메일만 글을 쓸 수 있습니다.",
+    invalid_email: "올바른 gmail.com 이메일을 입력해주세요.",
+    image_invalid: "이미지는 JPG, PNG, GIF, WEBP, AVIF 형식으로 최대 10MB까지 첨부할 수 있습니다.",
+    youtube_invalid: "올바른 YouTube 영상 링크를 입력해주세요.",
+    pdf_invalid: "PDF는 최대 50MB까지 첨부할 수 있습니다.",
   };
   const notice = noticeMap[searchParams?.error];
 
@@ -34,9 +31,7 @@ export default async function WritePage({ searchParams }) {
       <PostForm
         action="/api/post/new"
         submitLabel="Publish post"
-        helperText={
-          "물리학과 인문학은 승인된 이메일로만 글쓰기가 가능하고, 자유게시판은 누구나 쓸 수 있습니다."
-        }
+        helperText="자유게시판은 누구나 쓸 수 있고, 나머지 분류는 승인된 이메일로만 글쓰기가 가능합니다."
         notice={notice}
         defaultValues={{ authorEmail: searchParams?.email || "" }}
       />
