@@ -7,12 +7,6 @@ export default function Home() {
       <div className="page-container">
         <div className="landing-wrap">
           <section className="landing-panel">
-            <nav className="language-switch" aria-label="Language">
-              <span className="language-switch__item is-active">KR</span>
-              <Link className="language-switch__item" href="/en">
-                EN
-              </Link>
-            </nav>
             <h1 className="brand-title">NOIEO</h1>
             <div className="landing-image-wrap">
               <Image
@@ -36,6 +30,12 @@ export default function Home() {
             <p className="landing-quote">
               {"\uC778\uB958\uC758 \uC5ED\uC0AC\uB294 \uC778\uC815 \uD22C\uC7C1\uC758 \uC5ED\uC0AC\uB2E4."}
             </p>
+            <nav className="language-switch" aria-label="Language">
+              <span className="language-switch__item is-active">KR</span>
+              <Link className="language-switch__item" href="/en">
+                EN
+              </Link>
+            </nav>
           </section>
         </div>
       </div>

@@ -2,26 +2,36 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { POST_CATEGORIES } from "../lib/categories";
+import { POST_CATEGORIES, getCategoryLabel, getSubcategoryLabel } from "../lib/categories";
+import { getLocale, isEnglish } from "../lib/i18n";
 
-function categoryHref(category, subcategory = "") {
+function categoryHref(category, subcategory = "", lang = "ko") {
+  const english = isEnglish(lang);
+
   if (category === "all") {
-    return "/test/";
+    return english ? "/test/?lang=en" : "/test/";
   }
 
   const params = new URLSearchParams({ category });
   if (subcategory) {
     params.set("subcategory", subcategory);
   }
+  if (english) {
+    params.set("lang", "en");
+  }
   return `/test/?${params.toString()}`;
 }
 
-export default function CategoryFilter({ activeCategory = "all", activeSubcategory = "" }) {
+export default function CategoryFilter({ activeCategory = "all", activeSubcategory = "", lang = "ko" }) {
   const [openCategory, setOpenCategory] = useState("");
-  const filters = [{ value: "all", label: "전체", subcategories: [] }, ...POST_CATEGORIES];
+  const locale = getLocale(lang);
+  const filters = [
+    { value: "all", label: locale === "en" ? "All" : "전체", subcategories: [] },
+    ...POST_CATEGORIES,
+  ];
 
   return (
-    <nav className="category-filter" aria-label="게시판 분류">
+    <nav className="category-filter" aria-label={locale === "en" ? "Board categories" : "게시판 분류"}>
       {filters.map((filter) => {
         const hasSubcategories = filter.subcategories.length > 0;
         const isOpen = openCategory === filter.value;
@@ -34,7 +44,7 @@ export default function CategoryFilter({ activeCategory = "all", activeSubcatego
           >
             <Link
               className={`category-filter__item${isActive ? " is-active" : ""}`}
-              href={categoryHref(filter.value)}
+              href={categoryHref(filter.value, "", locale)}
               onMouseEnter={() => hasSubcategories && setOpenCategory(filter.value)}
               onClick={(event) => {
                 if (!hasSubcategories) {
@@ -45,7 +55,7 @@ export default function CategoryFilter({ activeCategory = "all", activeSubcatego
                 setOpenCategory(isOpen ? "" : filter.value);
               }}
             >
-              <span>{filter.label}</span>
+              <span>{filter.value === "all" ? filter.label : getCategoryLabel(filter.value, locale)}</span>
               {hasSubcategories ? <span className="category-filter__caret">⌄</span> : null}
             </Link>
             {hasSubcategories ? (
@@ -61,9 +71,9 @@ export default function CategoryFilter({ activeCategory = "all", activeSubcatego
                     <Link
                       key={subcategory.value}
                       className={`category-filter__subitem${subcategoryActive ? " is-active" : ""}`}
-                      href={categoryHref(filter.value, subcategoryValue)}
+                      href={categoryHref(filter.value, subcategoryValue, locale)}
                     >
-                      {subcategory.label}
+                      {getSubcategoryLabel(filter.value, subcategory.value, locale)}
                     </Link>
                   );
                 })}

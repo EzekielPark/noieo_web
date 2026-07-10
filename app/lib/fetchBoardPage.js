@@ -1,6 +1,7 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { connectDB } from "../test/mongo/database";
 import { BOARD_PAGE_SIZE, getDbName, getPagination, toPositiveNumber } from "./board";
+import { getLocale } from "./i18n";
 import {
   buildCategoryQuery,
   getCategoryFilter,
@@ -11,9 +12,10 @@ import {
   getSubcategoryLabel,
 } from "./categories";
 
-export default async function fetchBoardPage(page, category, subcategory) {
+export default async function fetchBoardPage(page, category, subcategory, lang) {
   noStore();
 
+  const locale = getLocale(lang);
   const currentPage = toPositiveNumber(page);
   const categoryFilter = getCategoryFilter(category);
   const subcategoryFilter = getSubcategoryFilter(categoryFilter, subcategory);
@@ -66,8 +68,8 @@ export default async function fetchBoardPage(page, category, subcategory) {
       commentCount: commentCountMap.get(post._id.toString()) || 0,
       category: getPostCategory(post),
       subcategory: getPostSubcategory(post),
-      categoryLabel: getCategoryLabel(getPostCategory(post)),
-      subcategoryLabel: getSubcategoryLabel(getPostCategory(post), getPostSubcategory(post)),
+      categoryLabel: getCategoryLabel(getPostCategory(post), locale),
+      subcategoryLabel: getSubcategoryLabel(getPostCategory(post), getPostSubcategory(post), locale),
     })),
   };
 }

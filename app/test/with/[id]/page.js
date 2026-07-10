@@ -14,6 +14,7 @@ import {
   getPostSubcategory,
   getSubcategoryLabel,
 } from "../../../lib/categories";
+import { getLocale, isEnglish, withLang } from "../../../lib/i18n";
 import { getYouTubeEmbedUrl } from "../../../lib/youtube";
 
 export const dynamic = "force-dynamic";
@@ -120,6 +121,8 @@ export async function generateMetadata({ params }) {
 export default async function PostDetailPage({ params, searchParams }) {
   noStore();
 
+  const locale = getLocale(searchParams?.lang);
+  const english = isEnglish(searchParams?.lang);
   const client = await connectDB;
   const db = client.db(getDbName());
   const postId = new ObjectId(params.id);
@@ -137,11 +140,13 @@ export default async function PostDetailPage({ params, searchParams }) {
     return (
       <div className="page-shell">
         <div className="center-panel glass-panel">
-          <h2 className="section-title">Post not found</h2>
-          <p className="field-hint">The link may point to a deleted post.</p>
+          <h2 className="section-title">{english ? "Post not found" : "게시글을 찾을 수 없습니다"}</h2>
+          <p className="field-hint">
+            {english ? "The link may point to a deleted post." : "삭제된 게시글이거나 잘못된 링크일 수 있습니다."}
+          </p>
           <div className="form-actions">
-            <Link className="button-primary" href="/test/">
-              Return to board
+            <Link className="button-primary" href={withLang("/test/", locale)}>
+              {english ? "Return to board" : "게시판으로"}
             </Link>
           </div>
         </div>
@@ -152,7 +157,7 @@ export default async function PostDetailPage({ params, searchParams }) {
   let currentViewCount = Number(post.view || 0);
   const category = getPostCategory(post);
   const subcategory = getPostSubcategory(post);
-  const subcategoryLabel = getSubcategoryLabel(category, subcategory);
+  const subcategoryLabel = getSubcategoryLabel(category, subcategory, locale);
   const youtubeEmbedUrl = getYouTubeEmbedUrl(post.youtube?.videoId);
 
   if (clientIp) {
@@ -210,16 +215,19 @@ export default async function PostDetailPage({ params, searchParams }) {
       actions={
         <>
           <a className="button-secondary" href={getTranslateUrl(params.id)} target="_blank" rel="noreferrer">
-            Translate
+            {english ? "Translate Page" : "Translate"}
           </a>
+          <Link className="button-secondary" href={english ? `/test/with/${post._id.toString()}` : `/test/with/${post._id.toString()}?lang=en`}>
+            {english ? "KR" : "EN"}
+          </Link>
           <Link className="button-secondary" href={`/edit/${post._id.toString()}`}>
-            Edit
+            {english ? "Edit" : "Edit"}
           </Link>
           <Link className="button-secondary" href={`/delete/${post._id.toString()}`}>
-            Delete
+            {english ? "Delete" : "Delete"}
           </Link>
-          <Link className="button-primary" href="/test/">
-            Board
+          <Link className="button-primary" href={withLang("/test/", locale)}>
+            {english ? "Board" : "Board"}
           </Link>
         </>
       }
@@ -236,10 +244,10 @@ export default async function PostDetailPage({ params, searchParams }) {
         </div>
         <div className="article-meta">
           <span>No. {post.number}</span>
-          <span>{getCategoryLabel(category)}</span>
+          <span>{getCategoryLabel(category, locale)}</span>
           {subcategoryLabel && subcategory !== "none" ? <span>{subcategoryLabel}</span> : null}
           <span>{post.date}</span>
-          <span>{currentViewCount} views</span>
+          <span>{currentViewCount} {english ? "views" : "조회"}</span>
         </div>
         {post.image?.dataUrl ? (
           <div className="article-image-wrap">

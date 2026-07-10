@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { isEnglish, withLang } from "../lib/i18n";
 
-function PostRow({ post }) {
+function PostRow({ post, lang = "ko" }) {
+  const english = isEnglish(lang);
+
   return (
-    <Link href={`/test/with/${post._id}`} className="board-row board-row--item">
+    <Link href={withLang(`/test/with/${post._id}`, lang)} className="board-row board-row--item">
       <div>{post.number}</div>
       <div className="board-row__title">
         <p className="board-title">
@@ -12,7 +15,7 @@ function PostRow({ post }) {
         <div className="board-row__meta">
           <span className="category-chip">{post.categoryLabel}</span>
           <span>{post.date}</span>
-          <span>{post.view} views</span>
+          <span>{post.view} {english ? "views" : "조회"}</span>
         </div>
       </div>
       <div>{post.date}</div>
@@ -21,19 +24,23 @@ function PostRow({ post }) {
   );
 }
 
-export default function BoardList({ posts }) {
+export default function BoardList({ posts, lang = "ko" }) {
+  const english = isEnglish(lang);
+
   return (
     <div className="board-table">
       <div className="board-row board-row--header">
-        <div>No.</div>
-        <div>Title</div>
-        <div>Date</div>
-        <div>Views</div>
+        <div>{english ? "No." : "번호"}</div>
+        <div>{english ? "Title" : "제목"}</div>
+        <div>{english ? "Date" : "날짜"}</div>
+        <div>{english ? "Views" : "조회"}</div>
       </div>
       {posts.length ? (
-        posts.map((post) => <PostRow key={post._id.toString()} post={post} />)
+        posts.map((post) => <PostRow key={post._id.toString()} post={post} lang={lang} />)
       ) : (
-        <div className="empty-state">No posts yet. Start the board with the first note.</div>
+        <div className="empty-state">
+          {english ? "No posts yet. Start the board with the first note." : "아직 게시글이 없습니다."}
+        </div>
       )}
     </div>
   );
