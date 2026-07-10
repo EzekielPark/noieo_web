@@ -25,7 +25,9 @@ export default async function handler(req, res) {
   const _id = normalizeText(req.body._id);
   const password = normalizeText(req.body.password);
   const title = normalizeText(req.body.title);
+  const titleEn = normalizeText(req.body.titleEn);
   const content = normalizeText(req.body.content);
+  const contentEn = normalizeText(req.body.contentEn);
   const category = normalizeCategory(req.body.category);
   const subcategory = normalizeSubcategory(category, req.body.subcategory);
   const imageDataUrl = normalizeText(req.body.imageDataUrl);
@@ -63,7 +65,9 @@ export default async function handler(req, res) {
 
   const $set = {
     title,
+    titleEn,
     content,
+    contentEn,
     category,
     subcategory,
     youtube,

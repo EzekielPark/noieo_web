@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getTranslateUrl } from "../lib/i18n";
 
 export const metadata = {
   title: "NOIEO in English",
@@ -38,7 +37,7 @@ export default function EnglishHome() {
                 height={726}
                 priority
               />
-              <a className="enter-link" href={getTranslateUrl("/test/")} target="_blank" rel="noreferrer">
+              <Link className="enter-link" href="/test?lang=en">
                 <Image
                   className="enter-sign"
                   src="/enter-sign.png"
@@ -46,7 +45,7 @@ export default function EnglishHome() {
                   width={225}
                   height={225}
                 />
-              </a>
+              </Link>
             </div>
             <p className="landing-quote">The history of humanity is the history of the struggle for recognition.</p>
             <nav className="language-switch" aria-label="Language">

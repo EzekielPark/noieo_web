@@ -3,10 +3,10 @@ import AppShell from "./AppShell";
 import BoardList from "./BoardList";
 import CategoryFilter from "./CategoryFilter";
 import Pagination from "./Pagination";
-import { getTranslateUrl, isEnglish, withLang } from "../lib/i18n";
+import { isEnglish, withLang } from "../lib/i18n";
 
 function getBoardPath(categoryFilter, subcategoryFilter, lang) {
-  let path = "/test/";
+  const path = "/test";
   const params = new URLSearchParams();
 
   if (categoryFilter && categoryFilter !== "all") {
@@ -31,26 +31,22 @@ export default function BoardPage({
   lang = "ko",
 }) {
   const english = isEnglish(lang);
-  const boardPath = getBoardPath(categoryFilter, subcategoryFilter, lang);
+  const englishBoardPath = getBoardPath(categoryFilter, subcategoryFilter, "en");
+  const koreanBoardPath = getBoardPath(categoryFilter, subcategoryFilter, "ko");
 
   return (
     <AppShell
       actions={
         <>
           {english ? (
-            <Link className="button-secondary" href="/test/">
+            <Link className="button-secondary" href={koreanBoardPath}>
               KR
             </Link>
           ) : (
-            <a className="button-secondary" href={getTranslateUrl(boardPath)} target="_blank" rel="noreferrer">
+            <Link className="button-secondary" href={englishBoardPath}>
               EN
-            </a>
+            </Link>
           )}
-          {english ? (
-            <a className="button-secondary" href={getTranslateUrl(boardPath)} target="_blank" rel="noreferrer">
-              Translate Page
-            </a>
-          ) : null}
           <Link className="button-secondary" href={withLang("/apply-writer/", lang)}>
             {english ? "Apply" : "신청"}
           </Link>

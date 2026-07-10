@@ -18,8 +18,3 @@ export function withLang(path, lang) {
   params.set("lang", "en");
   return `${pathname}?${params.toString()}`;
 }
-
-export function getTranslateUrl(path) {
-  const target = new URL(path, SITE_URL).toString();
-  return `https://translate.google.com/translate?sl=ko&tl=en&u=${encodeURIComponent(target)}`;
-}

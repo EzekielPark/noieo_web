@@ -3,13 +3,14 @@ import { isEnglish, withLang } from "../lib/i18n";
 
 function PostRow({ post, lang = "ko" }) {
   const english = isEnglish(lang);
+  const title = english && post.titleEn ? post.titleEn : post.title;
 
   return (
     <Link href={withLang(`/test/with/${post._id}`, lang)} className="board-row board-row--item">
       <div>{post.number}</div>
       <div className="board-row__title">
         <p className="board-title">
-          <span>{post.title}</span>
+          <span>{title}</span>
           {post.commentCount ? <span className="board-comment-count">{post.commentCount}</span> : null}
         </p>
         <div className="board-row__meta">

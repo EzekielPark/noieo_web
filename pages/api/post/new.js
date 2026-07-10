@@ -23,7 +23,9 @@ export default async function handler(req, res) {
   }
 
   const title = normalizeText(req.body.title);
+  const titleEn = normalizeText(req.body.titleEn);
   const content = normalizeText(req.body.content);
+  const contentEn = normalizeText(req.body.contentEn);
   const password = normalizeText(req.body.password);
   const authorEmail = normalizeEmail(req.body.authorEmail);
   const category = normalizeCategory(req.body.category);
@@ -90,7 +92,9 @@ export default async function handler(req, res) {
 
   await db.collection("board").insertOne({
     title,
+    titleEn,
     content,
+    contentEn,
     authorEmail,
     category,
     subcategory,

@@ -28,11 +28,6 @@ function getPostUrl(id) {
   return `${SITE_URL}/test/with/${id}`;
 }
 
-function getTranslateUrl(id) {
-  const url = encodeURIComponent(getPostUrl(id));
-  return `https://translate.google.com/translate?sl=ko&tl=en&u=${url}`;
-}
-
 function toPlainText(value, maxLength = 155) {
   const text = String(value || "")
     .replace(/\s+/g, " ")
@@ -191,11 +186,14 @@ export default async function PostDetailPage({ params, searchParams }) {
   }
 
   const comments = await db.collection("comment").find({ parent: params.id }).sort({ _id: 1 }).toArray();
+  const localizedTitle = english && post.titleEn ? post.titleEn : post.title;
+  const localizedContent = english && post.contentEn ? post.contentEn : post.content;
+  const hasEnglishTranslation = Boolean(post.titleEn || post.contentEn);
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "DiscussionForumPosting",
-    headline: post.title,
-    articleBody: post.content,
+    headline: localizedTitle,
+    articleBody: localizedContent,
     url: getPostUrl(params.id),
     datePublished: post.date,
     author: {
@@ -214,9 +212,6 @@ export default async function PostDetailPage({ params, searchParams }) {
     <AppShell
       actions={
         <>
-          <a className="button-secondary" href={getTranslateUrl(params.id)} target="_blank" rel="noreferrer">
-            {english ? "Translate Page" : "Translate"}
-          </a>
           <Link className="button-secondary" href={english ? `/test/with/${post._id.toString()}` : `/test/with/${post._id.toString()}?lang=en`}>
             {english ? "KR" : "EN"}
           </Link>
@@ -240,7 +235,7 @@ export default async function PostDetailPage({ params, searchParams }) {
       />
       <div className="article-panel glass-panel">
         <div className="section-heading">
-          <h2 className="article-title">{post.title}</h2>
+          <h2 className="article-title">{localizedTitle}</h2>
         </div>
         <div className="article-meta">
           <span>No. {post.number}</span>
@@ -251,7 +246,7 @@ export default async function PostDetailPage({ params, searchParams }) {
         </div>
         {post.image?.dataUrl ? (
           <div className="article-image-wrap">
-            <img className="article-image" src={post.image.dataUrl} alt={post.image.name || post.title} />
+            <img className="article-image" src={post.image.dataUrl} alt={post.image.name || localizedTitle} />
           </div>
         ) : null}
         {youtubeEmbedUrl ? (
@@ -259,14 +254,19 @@ export default async function PostDetailPage({ params, searchParams }) {
             <iframe
               className="article-video"
               src={youtubeEmbedUrl}
-              title={`${post.title} YouTube video`}
+              title={`${localizedTitle} YouTube video`}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
             />
           </div>
         ) : null}
         {post.pdf?.url ? <PdfBookViewer pdf={post.pdf} /> : null}
-        <div className="article-body">{post.content}</div>
+        {english && !hasEnglishTranslation ? (
+          <p className="field-hint">
+            English translation is not available for this post yet. The original Korean text is shown below.
+          </p>
+        ) : null}
+        <div className="article-body">{localizedContent}</div>
       </div>
       <CommentForm parentId={post._id.toString()} notice={notice} />
       <CommentList comments={comments} />
