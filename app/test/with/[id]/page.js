@@ -20,6 +20,98 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
 
+const SITE_URL = "https://noieo.com";
+const SITE_DESCRIPTION = "NOIEO는 물리학, 철학, 기독교를 중심으로 지식과 사유를 나누는 한국어 게시판입니다.";
+
+function getPostUrl(id) {
+  return `${SITE_URL}/test/with/${id}`;
+}
+
+function toPlainText(value, maxLength = 155) {
+  const text = String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (text.length <= maxLength) {
+    return text;
+  }
+
+  return `${text.slice(0, maxLength - 1).trim()}…`;
+}
+
+async function getPostForMetadata(id) {
+  if (!ObjectId.isValid(id)) {
+    return null;
+  }
+
+  const client = await connectDB;
+  const db = client.db(getDbName());
+  return db.collection("board").findOne(
+    { _id: new ObjectId(id) },
+    {
+      projection: {
+        title: 1,
+        content: 1,
+        category: 1,
+        subcategory: 1,
+      },
+    },
+  );
+}
+
+export async function generateMetadata({ params }) {
+  try {
+    const post = await getPostForMetadata(params.id);
+
+    if (!post) {
+      return {
+        title: "게시글을 찾을 수 없습니다",
+        description: SITE_DESCRIPTION,
+        robots: {
+          index: false,
+          follow: true,
+        },
+      };
+    }
+
+    const category = getPostCategory(post);
+    const subcategory = getPostSubcategory(post);
+    const categoryLabel = getCategoryLabel(category);
+    const subcategoryLabel = getSubcategoryLabel(category, subcategory);
+    const description =
+      toPlainText(post.content) ||
+      `${categoryLabel}${subcategoryLabel && subcategory !== "none" ? ` / ${subcategoryLabel}` : ""}에 관한 NOIEO 게시글입니다.`;
+    const url = getPostUrl(params.id);
+
+    return {
+      title: post.title,
+      description,
+      keywords: ["NOIEO", categoryLabel, subcategoryLabel, "물리학", "철학", "기독교"].filter(Boolean),
+      alternates: {
+        canonical: url,
+      },
+      openGraph: {
+        title: post.title,
+        description,
+        url,
+        siteName: "NOIEO",
+        locale: "ko_KR",
+        type: "article",
+      },
+      twitter: {
+        card: "summary",
+        title: post.title,
+        description,
+      },
+    };
+  } catch {
+    return {
+      title: "NOIEO",
+      description: SITE_DESCRIPTION,
+    };
+  }
+}
+
 export default async function PostDetailPage({ params, searchParams }) {
   noStore();
 
@@ -89,6 +181,24 @@ export default async function PostDetailPage({ params, searchParams }) {
   }
 
   const comments = await db.collection("comment").find({ parent: params.id }).sort({ _id: 1 }).toArray();
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "DiscussionForumPosting",
+    headline: post.title,
+    articleBody: post.content,
+    url: getPostUrl(params.id),
+    datePublished: post.date,
+    author: {
+      "@type": "Person",
+      name: post.authorEmail ? post.authorEmail.split("@")[0] : "NOIEO user",
+    },
+    commentCount: comments.length,
+    interactionStatistic: {
+      "@type": "InteractionCounter",
+      interactionType: "https://schema.org/ViewAction",
+      userInteractionCount: currentViewCount,
+    },
+  };
 
   return (
     <AppShell
@@ -106,6 +216,12 @@ export default async function PostDetailPage({ params, searchParams }) {
         </>
       }
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+        }}
+      />
       <div className="article-panel glass-panel">
         <div className="section-heading">
           <h2 className="article-title">{post.title}</h2>

@@ -31,7 +31,6 @@ export default function CategoryFilter({ activeCategory = "all", activeSubcatego
           <div
             key={filter.value}
             className={`category-filter__group${isOpen ? " is-open" : ""}`}
-            onMouseLeave={() => setOpenCategory("")}
           >
             <Link
               className={`category-filter__item${isActive ? " is-active" : ""}`}

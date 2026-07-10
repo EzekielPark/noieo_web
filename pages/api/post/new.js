@@ -37,7 +37,8 @@ export default async function handler(req, res) {
   const youtubeUrl = normalizeText(req.body.youtubeUrl);
   const youtube = normalizeYouTubeVideo(youtubeUrl);
   const pdfDataUrl = normalizeText(req.body.pdfDataUrl);
-  const pdfValidation = validatePdfDataUrl(pdfDataUrl);
+  const pdfName = normalizeText(req.body.pdfName);
+  const pdfValidation = validatePdfDataUrl(pdfDataUrl, pdfName);
 
   if (!title || !content || !/^\d{4}$/.test(password)) {
     return res.redirect(302, "/write/");
@@ -84,7 +85,7 @@ export default async function handler(req, res) {
   const total = await db.collection("board").countDocuments();
   const pdf = await savePostPdf({
     dataUrl: pdfDataUrl,
-    name: normalizeText(req.body.pdfName),
+    name: pdfName,
   });
 
   await db.collection("board").insertOne({

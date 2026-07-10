@@ -11,7 +11,8 @@ import {
 } from "../lib/categories";
 import { getPostImageError } from "../lib/postImage";
 
-const MAX_PDF_BYTES = 50 * 1000 * 1000;
+const MAX_DOCUMENT_BYTES = 50 * 1000 * 1000;
+const DOCUMENT_EXTENSIONS = [".pdf", ".epub"];
 
 export default function PostForm({
   action,
@@ -33,15 +34,15 @@ export default function PostForm({
   const [imageDataUrl, setImageDataUrl] = useState("");
   const [imageName, setImageName] = useState("");
   const [imageError, setImageError] = useState("");
-  const [pdfDataUrl, setPdfDataUrl] = useState("");
-  const [pdfName, setPdfName] = useState("");
-  const [pdfError, setPdfError] = useState("");
+  const [documentDataUrl, setDocumentDataUrl] = useState("");
+  const [documentName, setDocumentName] = useState("");
+  const [documentError, setDocumentError] = useState("");
   const [isReadingFile, setIsReadingFile] = useState(false);
   const activeCategory = useMemo(() => getCategory(category), [category]);
   const subcategories = activeCategory?.subcategories || [];
   const needsApprovedEmail = category !== "free";
   const currentImageName = defaultValues.image?.name || "";
-  const currentPdfName = defaultValues.pdf?.name || "";
+  const currentDocumentName = defaultValues.pdf?.name || "";
   const currentYouTubeUrl = defaultValues.youtube?.url || "";
 
   function handleImageChange(event) {
@@ -75,37 +76,39 @@ export default function PostForm({
     reader.readAsDataURL(file);
   }
 
-  function handlePdfChange(event) {
+  function handleDocumentChange(event) {
     const file = event.target.files?.[0];
-    setPdfDataUrl("");
-    setPdfName("");
-    setPdfError("");
+    setDocumentDataUrl("");
+    setDocumentName("");
+    setDocumentError("");
 
     if (!file) {
       return;
     }
 
-    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+    const lowerName = file.name.toLowerCase();
+    const isSupported = DOCUMENT_EXTENSIONS.some((extension) => lowerName.endsWith(extension));
+    if (!isSupported) {
       event.target.value = "";
-      setPdfError("PDF 파일만 첨부할 수 있습니다.");
+      setDocumentError("PDF 또는 EPUB 파일만 첨부할 수 있습니다.");
       return;
     }
 
-    if (file.size > MAX_PDF_BYTES) {
+    if (file.size > MAX_DOCUMENT_BYTES) {
       event.target.value = "";
-      setPdfError("PDF는 최대 50MB까지 첨부할 수 있습니다.");
+      setDocumentError("문서는 최대 50MB까지 첨부할 수 있습니다.");
       return;
     }
 
     setIsReadingFile(true);
     const reader = new FileReader();
     reader.onload = () => {
-      setPdfDataUrl(String(reader.result || ""));
-      setPdfName(file.name);
+      setDocumentDataUrl(String(reader.result || ""));
+      setDocumentName(file.name);
       setIsReadingFile(false);
     };
     reader.onerror = () => {
-      setPdfError("PDF를 읽지 못했습니다. 다시 선택해주세요.");
+      setDocumentError("문서를 읽지 못했습니다. 다시 선택해주세요.");
       setIsReadingFile(false);
     };
     reader.readAsDataURL(file);
@@ -210,13 +213,13 @@ export default function PostForm({
           <p className="field-hint">유튜브 영상 링크 1개를 선택적으로 첨부할 수 있습니다.</p>
         </label>
         <label className="field--full">
-          <span>PDF</span>
-          <input type="file" accept="application/pdf,.pdf" onChange={handlePdfChange} />
-          <input type="hidden" name="pdfDataUrl" value={pdfDataUrl} />
-          <input type="hidden" name="pdfName" value={pdfName} />
-          {currentPdfName && !pdfName ? <p className="field-hint">현재 PDF: {currentPdfName}</p> : null}
-          {pdfName ? <p className="field-hint">첨부 PDF: {pdfName}</p> : null}
-          {pdfError ? <p className="notice-inline">{pdfError}</p> : null}
+          <span>문서</span>
+          <input type="file" accept="application/pdf,application/epub+zip,.pdf,.epub" onChange={handleDocumentChange} />
+          <input type="hidden" name="pdfDataUrl" value={documentDataUrl} />
+          <input type="hidden" name="pdfName" value={documentName} />
+          {currentDocumentName && !documentName ? <p className="field-hint">현재 문서: {currentDocumentName}</p> : null}
+          {documentName ? <p className="field-hint">첨부 문서: {documentName}</p> : null}
+          {documentError ? <p className="notice-inline">{documentError}</p> : null}
         </label>
         <label className="field--full">
           <span>Content</span>

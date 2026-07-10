@@ -230,7 +230,6 @@ button {
   transition: opacity 140ms ease, transform 140ms ease;
 }
 
-.category-filter__group:hover .category-filter__dropdown,
 .category-filter__group.is-open .category-filter__dropdown {
   opacity: 1;
   transform: translateY(0);
@@ -490,21 +489,57 @@ button {
   text-align: center;
 }
 
-.pdf-book__pages {
+.pdf-book__jump {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.pdf-book__jump input {
+  width: 72px;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  text-align: center;
+}
+
+.pdf-book__spread-view {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+  align-items: start;
+  perspective: 1200px;
 }
 
 .pdf-book__page {
   position: relative;
-  min-height: 560px;
+  min-height: 520px;
   overflow: hidden;
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015)),
-    #101217;
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.012)),
+    #f4f1ea;
+  box-shadow: inset 10px 0 24px rgba(0, 0, 0, 0.08);
+}
+
+.pdf-book__page:first-child {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+  box-shadow:
+    inset -16px 0 30px rgba(0, 0, 0, 0.1),
+    12px 0 24px rgba(0, 0, 0, 0.18);
+}
+
+.pdf-book__page:last-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+  box-shadow:
+    inset 16px 0 30px rgba(0, 0, 0, 0.1),
+    -12px 0 24px rgba(0, 0, 0, 0.18);
 }
 
 .pdf-book.is-fullscreen .pdf-book__page,
@@ -512,12 +547,11 @@ button {
   min-height: calc(100vh - 136px);
 }
 
-.pdf-book__frame {
+.pdf-book__canvas {
+  display: block;
   width: 100%;
-  height: 100%;
-  min-height: inherit;
-  border: 0;
-  background: #151820;
+  height: auto;
+  background: #fff;
 }
 
 .pdf-book__page-number {
@@ -532,6 +566,63 @@ button {
   background: rgba(0, 0, 0, 0.48);
   color: rgba(255, 255, 255, 0.72);
   font-size: 0.78rem;
+}
+
+.pdf-book__loading,
+.pdf-book__blank,
+.pdf-book__placeholder {
+  display: grid;
+  place-items: center;
+  min-height: inherit;
+  color: rgba(16, 19, 23, 0.56);
+  font-size: 0.9rem;
+}
+
+.pdf-book__loading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  min-height: 0;
+  background: rgba(244, 241, 234, 0.82);
+}
+
+.pdf-book__placeholder {
+  min-height: 320px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--muted);
+}
+
+.epub-book__shell {
+  position: relative;
+}
+
+.epub-book__stage {
+  min-height: 620px;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #f4f1ea;
+  box-shadow:
+    inset 0 0 30px rgba(0, 0, 0, 0.08),
+    0 18px 40px rgba(0, 0, 0, 0.22);
+}
+
+.epub-book__loading {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: rgba(244, 241, 234, 0.88);
+  color: rgba(16, 19, 23, 0.56);
+  font-size: 0.9rem;
+}
+
+.pdf-book.is-fullscreen .epub-book__stage,
+.pdf-book:fullscreen .epub-book__stage {
+  min-height: calc(100vh - 136px);
 }
 
 .pdf-book__open {
@@ -990,12 +1081,24 @@ button {
     flex: 1 1 64px;
   }
 
-  .pdf-book__pages {
+  .pdf-book__jump {
+    width: 100%;
+  }
+
+  .pdf-book__jump input {
+    flex: 1 1 auto;
+  }
+
+  .pdf-book__spread-view {
     grid-template-columns: 1fr;
   }
 
   .pdf-book__page {
     min-height: 420px;
+  }
+
+  .epub-book__stage {
+    min-height: 460px;
   }
 
   .pagination {

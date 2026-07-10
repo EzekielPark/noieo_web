@@ -36,7 +36,8 @@ export default async function handler(req, res) {
   const youtubeUrl = normalizeText(req.body.youtubeUrl);
   const youtube = normalizeYouTubeVideo(youtubeUrl);
   const pdfDataUrl = normalizeText(req.body.pdfDataUrl);
-  const pdfValidation = validatePdfDataUrl(pdfDataUrl);
+  const pdfName = normalizeText(req.body.pdfName);
+  const pdfValidation = validatePdfDataUrl(pdfDataUrl, pdfName);
 
   if (!_id || !title || !content || !/^\d{4}$/.test(password)) {
     return res.redirect(302, `/edit/${_id}`);
@@ -74,7 +75,7 @@ export default async function handler(req, res) {
 
   const pdf = await savePostPdf({
     dataUrl: pdfDataUrl,
-    name: normalizeText(req.body.pdfName),
+    name: pdfName,
   });
 
   if (pdf) {

@@ -2,7 +2,7 @@ export default function manifest() {
   return {
     name: "NOIEO",
     short_name: "NOIEO",
-    description: "A minimal glassmorphism community board.",
+    description: "물리학, 철학, 기독교를 중심으로 지식과 사유를 나누는 한국어 게시판입니다.",
     start_url: "/",
     display: "standalone",
     background_color: "#111214",

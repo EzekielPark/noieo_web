@@ -11,7 +11,7 @@ export default async function WritePage({ searchParams }) {
     invalid_email: "올바른 gmail.com 이메일을 입력해주세요.",
     image_invalid: "이미지는 JPG, PNG, GIF, WEBP, AVIF 형식으로 최대 10MB까지 첨부할 수 있습니다.",
     youtube_invalid: "올바른 YouTube 영상 링크를 입력해주세요.",
-    pdf_invalid: "PDF는 최대 50MB까지 첨부할 수 있습니다.",
+    pdf_invalid: "PDF 또는 EPUB 문서는 최대 50MB까지 첨부할 수 있습니다.",
   };
   const notice = noticeMap[searchParams?.error];
 
