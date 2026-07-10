@@ -27,6 +27,11 @@ function getPostUrl(id) {
   return `${SITE_URL}/test/with/${id}`;
 }
 
+function getTranslateUrl(id) {
+  const url = encodeURIComponent(getPostUrl(id));
+  return `https://translate.google.com/translate?sl=ko&tl=en&u=${url}`;
+}
+
 function toPlainText(value, maxLength = 155) {
   const text = String(value || "")
     .replace(/\s+/g, " ")
@@ -204,6 +209,9 @@ export default async function PostDetailPage({ params, searchParams }) {
     <AppShell
       actions={
         <>
+          <a className="button-secondary" href={getTranslateUrl(params.id)} target="_blank" rel="noreferrer">
+            Translate
+          </a>
           <Link className="button-secondary" href={`/edit/${post._id.toString()}`}>
             Edit
           </Link>

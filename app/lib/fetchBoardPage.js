@@ -32,6 +32,26 @@ export default async function fetchBoardPage(page, category, subcategory) {
     .skip(skip)
     .limit(BOARD_PAGE_SIZE)
     .toArray();
+  const postIds = posts.map((post) => post._id.toString());
+  const commentCounts = postIds.length
+    ? await db
+        .collection("comment")
+        .aggregate([
+          {
+            $match: {
+              parent: { $in: postIds },
+            },
+          },
+          {
+            $group: {
+              _id: "$parent",
+              count: { $sum: 1 },
+            },
+          },
+        ])
+        .toArray()
+    : [];
+  const commentCountMap = new Map(commentCounts.map((item) => [item._id, Number(item.count || 0)]));
 
   return {
     totalPosts,
@@ -43,6 +63,7 @@ export default async function fetchBoardPage(page, category, subcategory) {
       ...post,
       date: post.date || "",
       view: Number(post.view || 0),
+      commentCount: commentCountMap.get(post._id.toString()) || 0,
       category: getPostCategory(post),
       subcategory: getPostSubcategory(post),
       categoryLabel: getCategoryLabel(getPostCategory(post)),

@@ -1,17 +1,37 @@
 import Link from "next/link";
 import Image from "next/image";
 
-export default function Home() {
+export const metadata = {
+  title: "NOIEO in English",
+  description: "NOIEO is a Korean board for physics, philosophy, and Christianity.",
+  alternates: {
+    canonical: "/en",
+    languages: {
+      ko: "/",
+      en: "/en",
+    },
+  },
+  openGraph: {
+    title: "NOIEO in English",
+    description: "A Korean board for physics, philosophy, and Christianity.",
+    url: "https://noieo.com/en",
+    siteName: "NOIEO",
+    locale: "en_US",
+    type: "website",
+  },
+};
+
+export default function EnglishHome() {
   return (
     <div className="page-shell">
       <div className="page-container">
         <div className="landing-wrap">
           <section className="landing-panel">
             <nav className="language-switch" aria-label="Language">
-              <span className="language-switch__item is-active">KR</span>
-              <Link className="language-switch__item" href="/en">
-                EN
+              <Link className="language-switch__item" href="/">
+                KR
               </Link>
+              <span className="language-switch__item is-active">EN</span>
             </nav>
             <h1 className="brand-title">NOIEO</h1>
             <div className="landing-image-wrap">
@@ -23,7 +43,7 @@ export default function Home() {
                 height={726}
                 priority
               />
-              <Link className="enter-link" href="/test/">
+              <Link className="enter-link" href="/test/?lang=en">
                 <Image
                   className="enter-sign"
                   src="/enter-sign.png"
@@ -33,9 +53,7 @@ export default function Home() {
                 />
               </Link>
             </div>
-            <p className="landing-quote">
-              {"\uC778\uB958\uC758 \uC5ED\uC0AC\uB294 \uC778\uC815 \uD22C\uC7C1\uC758 \uC5ED\uC0AC\uB2E4."}
-            </p>
+            <p className="landing-quote">The history of humanity is the history of the struggle for recognition.</p>
           </section>
         </div>
       </div>

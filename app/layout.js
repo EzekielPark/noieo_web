@@ -10,6 +10,10 @@ export const metadata = {
   keywords: ["NOIEO", "물리학", "철학", "기독교", "인문학", "자연과학", "게시판"],
   alternates: {
     canonical: "/",
+    languages: {
+      ko: "/",
+      en: "/en",
+    },
   },
   openGraph: {
     title: "NOIEO",

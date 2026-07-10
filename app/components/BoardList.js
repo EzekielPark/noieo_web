@@ -5,7 +5,10 @@ function PostRow({ post }) {
     <Link href={`/test/with/${post._id}`} className="board-row board-row--item">
       <div>{post.number}</div>
       <div className="board-row__title">
-        <p className="board-title">{post.title}</p>
+        <p className="board-title">
+          <span>{post.title}</span>
+          {post.commentCount ? <span className="board-comment-count">{post.commentCount}</span> : null}
+        </p>
         <div className="board-row__meta">
           <span className="category-chip">{post.categoryLabel}</span>
           <span>{post.date}</span>
