@@ -41,6 +41,21 @@ docker run --rm -it -p 127.0.0.1:5000:5000 libretranslate/libretranslate
 
 If the local translation server is offline, posts still save normally and English mode falls back to Korean text.
 
+Backfill English translation cache for existing posts:
+
+```bash
+npm run translate:backfill -- --dry-run
+npm run translate:backfill
+```
+
+Useful options:
+
+```bash
+npm run translate:backfill -- --limit=20
+npm run translate:backfill -- --id=<post ObjectId>
+npm run translate:backfill -- --force
+```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
