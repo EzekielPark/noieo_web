@@ -15,6 +15,7 @@ import {
   getSubcategoryLabel,
 } from "../../../lib/categories";
 import { getLocale, isEnglish, withLang } from "../../../lib/i18n";
+import { ensurePostEnglishTranslation } from "../../../lib/localTranslate";
 import { getYouTubeEmbedUrl } from "../../../lib/youtube";
 
 export const dynamic = "force-dynamic";
@@ -129,7 +130,7 @@ export default async function PostDetailPage({ params, searchParams }) {
   const viewDate = formatDate();
   const notice = searchParams?.error === "rate_limit" ? "잠시 후 다시 시도해주세요" : undefined;
 
-  const post = await db.collection("board").findOne({ _id: postId });
+  let post = await db.collection("board").findOne({ _id: postId });
 
   if (!post) {
     return (
@@ -150,6 +151,10 @@ export default async function PostDetailPage({ params, searchParams }) {
   }
 
   let currentViewCount = Number(post.view || 0);
+  if (english) {
+    post = await ensurePostEnglishTranslation(db, post);
+  }
+
   const category = getPostCategory(post);
   const subcategory = getPostSubcategory(post);
   const subcategoryLabel = getSubcategoryLabel(category, subcategory, locale);

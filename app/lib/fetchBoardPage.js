@@ -2,6 +2,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { connectDB } from "../test/mongo/database";
 import { BOARD_PAGE_SIZE, getDbName, getPagination, toPositiveNumber } from "./board";
 import { getLocale } from "./i18n";
+import { ensurePostEnglishTitle } from "./localTranslate";
 import {
   buildCategoryQuery,
   getCategoryFilter,
@@ -34,7 +35,11 @@ export default async function fetchBoardPage(page, category, subcategory, lang) 
     .skip(skip)
     .limit(BOARD_PAGE_SIZE)
     .toArray();
-  const postIds = posts.map((post) => post._id.toString());
+  const visiblePosts =
+    locale === "en"
+      ? await Promise.all(posts.map((post) => ensurePostEnglishTitle(db, post)))
+      : posts;
+  const postIds = visiblePosts.map((post) => post._id.toString());
   const commentCounts = postIds.length
     ? await db
         .collection("comment")
@@ -61,7 +66,7 @@ export default async function fetchBoardPage(page, category, subcategory, lang) 
     pagination,
     categoryFilter,
     subcategoryFilter,
-    posts: posts.map((post) => ({
+    posts: visiblePosts.map((post) => ({
       ...post,
       date: post.date || "",
       view: Number(post.view || 0),

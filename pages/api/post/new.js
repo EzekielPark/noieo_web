@@ -5,6 +5,7 @@ import { normalizePostImage } from "app/lib/postImage";
 import { savePostPdf, validatePdfDataUrl } from "app/lib/postPdf";
 import { allowRequestByIp } from "app/lib/rateLimit";
 import { isApprovedWriter, isValidGmailEmail, normalizeEmail } from "app/lib/writerApproval";
+import { getPostEnglishTranslation } from "app/lib/localTranslate";
 import { normalizeYouTubeVideo } from "app/lib/youtube";
 
 export const config = {
@@ -23,9 +24,7 @@ export default async function handler(req, res) {
   }
 
   const title = normalizeText(req.body.title);
-  const titleEn = normalizeText(req.body.titleEn);
   const content = normalizeText(req.body.content);
-  const contentEn = normalizeText(req.body.contentEn);
   const password = normalizeText(req.body.password);
   const authorEmail = normalizeEmail(req.body.authorEmail);
   const category = normalizeCategory(req.body.category);
@@ -89,12 +88,12 @@ export default async function handler(req, res) {
     dataUrl: pdfDataUrl,
     name: pdfName,
   });
+  const translation = await getPostEnglishTranslation({ title, content });
 
   await db.collection("board").insertOne({
     title,
-    titleEn,
     content,
-    contentEn,
+    ...translation,
     authorEmail,
     category,
     subcategory,

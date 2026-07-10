@@ -20,6 +20,27 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
+## Local Translation
+
+NOIEO can cache English translations through a local LibreTranslate/Argos server.
+Keep the translation server bound to `127.0.0.1` so it is not exposed publicly.
+
+Default app settings:
+
+```env
+LIBRETRANSLATE_URL=http://127.0.0.1:5000/translate
+LOCAL_TRANSLATE_ENABLED=true
+LOCAL_TRANSLATE_TIMEOUT_MS=3500
+```
+
+Example Docker start command:
+
+```bash
+docker run --rm -it -p 127.0.0.1:5000:5000 libretranslate/libretranslate
+```
+
+If the local translation server is offline, posts still save normally and English mode falls back to Korean text.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

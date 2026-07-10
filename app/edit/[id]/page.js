@@ -37,9 +37,7 @@ export default async function EditPage({ params }) {
         helperText="Enter the original 4-digit password to save."
         defaultValues={{
           title: post.title,
-          titleEn: post.titleEn,
           content: post.content,
-          contentEn: post.contentEn,
           category: post.category,
           subcategory: post.subcategory,
           image: post.image,

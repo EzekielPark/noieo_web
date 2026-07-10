@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { connectDB } from "app/test/mongo/database";
 import { getDbName, normalizeText } from "app/lib/board";
 import { normalizeCategory, normalizeSubcategory } from "app/lib/categories";
+import { getPostEnglishTranslation } from "app/lib/localTranslate";
 import { normalizePostImage } from "app/lib/postImage";
 import { savePostPdf, validatePdfDataUrl } from "app/lib/postPdf";
 import { normalizeYouTubeVideo } from "app/lib/youtube";
@@ -25,9 +26,7 @@ export default async function handler(req, res) {
   const _id = normalizeText(req.body._id);
   const password = normalizeText(req.body.password);
   const title = normalizeText(req.body.title);
-  const titleEn = normalizeText(req.body.titleEn);
   const content = normalizeText(req.body.content);
-  const contentEn = normalizeText(req.body.contentEn);
   const category = normalizeCategory(req.body.category);
   const subcategory = normalizeSubcategory(category, req.body.subcategory);
   const imageDataUrl = normalizeText(req.body.imageDataUrl);
@@ -63,11 +62,29 @@ export default async function handler(req, res) {
     return res.redirect(302, `/edit/${_id}`);
   }
 
+  const contentChanged = title !== post.title || content !== post.content;
+  const needsTranslation = contentChanged || !post.titleEn || !post.contentEn;
+  const translation = needsTranslation
+    ? await getPostEnglishTranslation({ title, content })
+    : {
+        titleEn: post.titleEn || "",
+        contentEn: post.contentEn || "",
+        translationProvider: post.translationProvider || "",
+        translatedAt: post.translatedAt || null,
+      };
+
+  const safeTranslation = {
+    titleEn: translation.titleEn || (!contentChanged ? post.titleEn || "" : ""),
+    contentEn: translation.contentEn || (!contentChanged ? post.contentEn || "" : ""),
+    translationProvider:
+      translation.translationProvider || (!contentChanged ? post.translationProvider || "" : ""),
+    translatedAt: translation.translatedAt || (!contentChanged ? post.translatedAt || null : null),
+  };
+
   const $set = {
     title,
-    titleEn,
     content,
-    contentEn,
+    ...safeTranslation,
     category,
     subcategory,
     youtube,

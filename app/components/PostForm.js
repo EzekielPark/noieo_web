@@ -23,7 +23,7 @@ export default function PostForm({
   notice,
   hiddenFields = [],
 }) {
-  const { title = "", titleEn = "", content = "", contentEn = "", authorEmail = "" } = defaultValues;
+  const { title = "", content = "", authorEmail = "" } = defaultValues;
   const initialCategory = normalizeCategory(defaultValues.category);
   const initialSubcategory = normalizeSubcategory(
     initialCategory,
@@ -137,10 +137,6 @@ export default function PostForm({
           <span>Title</span>
           <input name="title" maxLength="60" defaultValue={title} required />
         </label>
-        <label className="field--full">
-          <span>English title (optional)</span>
-          <input name="titleEn" maxLength="90" defaultValue={titleEn} />
-        </label>
         <label>
           <span>대분류</span>
           <select
@@ -228,10 +224,6 @@ export default function PostForm({
         <label className="field--full">
           <span>Content</span>
           <textarea name="content" maxLength="2000" defaultValue={content} required />
-        </label>
-        <label className="field--full">
-          <span>English content (optional)</span>
-          <textarea name="contentEn" maxLength="4000" defaultValue={contentEn} />
         </label>
       </div>
       {hiddenFields.map((field) => (
